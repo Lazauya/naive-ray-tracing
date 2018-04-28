@@ -1,0 +1,35 @@
+Hello!
+
+So first and foremost, I must say that i'm terrible at documentation
+
+What I have implemented so far:
+-triangle, plane, sphere intersections
+-directional light, point light (with falloff)
+-shaders (allows custom shaders)
+--specular
+--diffuse
+--ambient
+--shadows (simple)
+-orthographic, perspective rendering
+-antialiasing
+-BVH's for faster renders
+-model imports using .off files (working for most simple models, no real api yet, must chage the name of the file in main.cpp)
+
+to implement:
+-more inline documentation, sorry about that
+-some kind of percent notifier for when rays are being setup
+
+dependencies:
+-lippng
+-libpng++ (c++ wrapper for libpng)
+insall dependencies with apt install libpng++-dev on debian distros
+
+renders folder contains some sample renders.
+the program takes a the type of access to use, type "bvh" for BVH and anything else for linear. next is the amount of spheres. then the size of image.
+
+adding objects requires you to create an object with new and add it to the scene. the scene::render() function will draw everything and output a png.
+
+there shouldn't be any real memory leaks from the api, but if i find any i'll be sure to fix them
+
+Thanks!
+-Krist Pregracke
