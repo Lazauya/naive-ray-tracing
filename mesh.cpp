@@ -8,7 +8,7 @@
 
 namespace objects
 {
-	mesh::mesh(std::list<object*> & f, rgbColor col, F64 sh, rgbColor s) : object(col, sh, s)
+	mesh::mesh(std::list<object*> & f, rgbColor col, F64 sh, rgbColor s, rgbColor ref, F64 t, F64 scat, F64 eta) : object(col, sh, s, ref, t, scat, eta)
        	{
 		point * b;
 		heir = bvh_n::bvh(f, 6);
@@ -33,7 +33,7 @@ namespace objects
 		return std::stoi(tokens[pos]);
 	}
 
-	mesh::mesh(std::string filename, rgbColor col, F64 sh, rgbColor s) : object(col, sh, s)
+	mesh::mesh(std::string filename, rgbColor col, F64 sh, rgbColor s, rgbColor ref, F64 t, F64 scat, F64 eta) : object(col, sh, s, ref, t, scat, eta)
 	{
 		std::fstream o(filename);
 		std::string line;
@@ -58,7 +58,7 @@ namespace objects
 				std::istream_iterator<std::string> beg(buf), end;
 				std::vector<std::string> tokens(beg, end);
 					
-				if(line[0] == '\n' || line[0] == '#')
+				if(line[0] == '\n' || line[0] == '#' || line == "OFF")
 					continue;
 	
 				if(line_num == 0 && hasNotVisited)
@@ -116,6 +116,8 @@ namespace objects
 					{
 						continue;
 					}
+				case 's':
+					continue;
 				case 'f':
 					//std::cout << "f" << std::endl;
 					for(int i = 1; i < tokens.size()-2; i++)
@@ -133,6 +135,7 @@ namespace objects
 			}
 		}
 		std::list<object*> temp(faces.begin(), faces.end());
+		objs = std::vector<object*>(faces.begin(), faces.end());
 		heir = bvh_n::bvh(temp, 6);
 		b1 = ma;
 		b2 = mi;
@@ -159,4 +162,83 @@ namespace objects
 		p[1] = b2;
 		return p;
 	}
+
+	void mesh::rotate(point cen, vec3d dir, F64 rad)
+	{
+		point ma(INVALID_COORDINATE,0,0);
+		point mi(INVALID_COORDINATE,0,0);
+		for(auto & o : objs)
+		{
+			((triangle*)o)->rotate(cen, dir, rad);
+			auto b = o->bounds();
+			if(ma.x == INVALID_COORDINATE)
+			{
+				ma = b[0];
+				mi = b[1];
+			}
+			else
+			{
+				ma.x = std::max(b[0].x, ma.x); ma.y = std::max(b[0].y, ma.y); ma.z = std::max(b[0].z, ma.z);
+				mi.x = std::min(b[1].x, mi.x); mi.y = std::min(b[1].y, mi.y); mi.z = std::min(b[1].z, mi.z);
+			}
+			delete b;
+		}
+		b1 = ma;
+		b2 = mi;
+		std::list<object*> temp(objs.begin(), objs.end());
+		heir = bvh_n::bvh(temp, 6);
+	}
+
+	void mesh::translate(F64 x, F64 y, F64 z)
+	{
+		point ma(INVALID_COORDINATE,0,0);
+		point mi(INVALID_COORDINATE,0,0);
+		for(auto & o : objs)
+		{
+			((triangle*)o)->translate(x,y,z);
+			auto b = o->bounds();
+			if(ma.x == INVALID_COORDINATE)
+			{
+				ma = b[0];
+				mi = b[1];
+			}
+			else
+			{
+				ma.x = std::max(b[0].x, ma.x); ma.y = std::max(b[0].y, ma.y); ma.z = std::max(b[0].z, ma.z);
+				mi.x = std::min(b[1].x, mi.x); mi.y = std::min(b[1].y, mi.y); mi.z = std::min(b[1].z, mi.z);
+			}
+			delete b;
+		}
+		b1 = ma;
+		b2 = mi;
+		std::list<object*> temp(objs.begin(), objs.end());
+		heir = bvh_n::bvh(temp, 6);
+	}
+
+	void mesh::scale(point cen, F64 s)
+	{
+		point ma(INVALID_COORDINATE,0,0);
+		point mi(INVALID_COORDINATE,0,0);
+		for(auto & o : objs)
+		{
+			((triangle*)o)->scale(cen, s);
+			auto b = o->bounds();
+			if(ma.x == INVALID_COORDINATE)
+			{
+				ma = b[0];
+				mi = b[1];
+			}
+			else
+			{
+				ma.x = std::max(b[0].x, ma.x); ma.y = std::max(b[0].y, ma.y); ma.z = std::max(b[0].z, ma.z);
+				mi.x = std::min(b[1].x, mi.x); mi.y = std::min(b[1].y, mi.y); mi.z = std::min(b[1].z, mi.z);
+			}
+			delete b;
+		}
+		b1 = ma;
+		b2 = mi;
+		std::list<object*> temp(objs.begin(), objs.end());
+		heir = bvh_n::bvh(temp, 6);
+	}
+
 }

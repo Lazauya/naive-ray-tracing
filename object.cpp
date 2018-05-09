@@ -10,7 +10,7 @@
 
 namespace objects
 {
-	plane::plane(F64 c1, F64 c2, F64 c3, F64 c4, rgbColor c, F64 sh, rgbColor s) : object(c, sh, s)
+	plane::plane(F64 c1, F64 c2, F64 c3, F64 c4, rgbColor c, F64 sh, rgbColor s, rgbColor ref, F64 t, F64 scat, F64 eta) : object(c, sh, s, ref, t, scat, eta)
 	{
 		normal_ = vec3d(c1, c2, c3).unit();
 		includedPoint_ = point(0, 0, -c4/c3);
@@ -35,7 +35,7 @@ namespace objects
 		return p;
 	}
 	
-	triangle::triangle(point p1, point p2, point p3, rgbColor c, F64 sh, rgbColor s) : plane(c, sh, s)
+	triangle::triangle(point p1, point p2, point p3, rgbColor c, F64 sh, rgbColor s, rgbColor ref, F64 t, F64 scat, F64 eta) : plane(c, sh, s, ref, t, scat, eta)
 	{
 		normal_ = vec3d(p1, p2).cross(vec3d(p3, p2)).unit();
 		includedPoint_ = p1;
@@ -111,8 +111,46 @@ namespace objects
 		p[1] = point(std::min({v1.x, v2.x, v3.x}), std::min({v1.y, v2.y, v3.y}), std::min({v1.z, v2.z, v3.z}));
 		return p;
 	}
+	
+	void triangle::rotate(point cen, vec3d dir, F64 rad)
+	{
+		//std::cout << "======" << std::endl;
+		//pp(v1); std::cout << std::endl;
+		v1 = (point)(vec3d(v1, cen).rotate(dir, rad)) + cen;
+		//pp(v1); std::cout << std::endl;
+		
+		//pp(v2); std::cout << std::endl;
+		v2 = (point)(vec3d(v2, cen).rotate(dir, rad)) + cen;
+		//pp(v2); std::cout << std::endl;
+		
+		//pp(v3); std::cout << std::endl;
+		v3 = (point)(vec3d(v3, cen).rotate(dir, rad)) + cen;
+		//pp(v3); std::cout << std::endl;
 
-	rectangle::rectangle(point p1, point p2, vec3d _side, rgbColor c, F64 sh, rgbColor s) : plane(c, sh, s), v1(p1), v2(p2)
+		normal_ = vec3d(v2, v1).cross(vec3d(v3, v1)).unit();
+		includedPoint_ = v1;
+	}
+	
+	void triangle::translate(F64 x, F64 y, F64 z)
+	{
+		v1.x += x; v2.x += x; v3.x += x;
+		v1.y += y; v2.y += y; v3.y += y;
+		v1.z += z; v2.z += z; v3.z += z;
+		includedPoint_ = v1;
+	}
+
+	void triangle::scale(point cen, F64 s)
+	{
+		v1 = (point)(vec3d(v1, cen)*s);
+		v2 = (point)(vec3d(v2, cen)*s);
+		v3 = (point)(vec3d(v3, cen)*s);
+		includedPoint_ = v1;
+	}
+
+	rectangle::rectangle(point p1, point p2, vec3d _side, rgbColor c, F64 sh, rgbColor s, rgbColor ref, F64 t, F64 scat, F64 eta) :
+	       	plane(c, sh, s, ref, t, scat, eta),
+	       	v1(p1),
+	       	v2(p2)
 	{
 		vec3d diag(v2, v1);
 		normal_ = diag.cross(_side);
@@ -169,10 +207,4 @@ namespace objects
 		p[1] = point(center.x-radius, center.y-radius, center.z-radius);
 		return p;
 	}
-
-	/*#ifdef MESH_OBJ	
-
-	
-
-	#endif*/
 }

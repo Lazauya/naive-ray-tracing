@@ -182,12 +182,14 @@ namespace bvh_n
 				if(top.index*2 < heir.size())
 				{
 					//std::cout << heir.size() << " push 2 " <<  std::endl;
-					toVisit.push(heir[top.index*2]);
+					if(heir[top.index*2].numObjs)
+						toVisit.push(heir[top.index*2]);
 					
 					if(top.index*2+1 < heir.size())
 					{
 						//std::cout << "push 3 " << heir[top.index*2+1].index << std::endl;
-						toVisit.push(heir[top.index*2+1]);
+						if(heir[top.index*2+1].numObjs)
+							toVisit.push(heir[top.index*2+1]);
 					}
 				}
 			}
@@ -244,9 +246,15 @@ namespace bvh_n
 		while(toVisit.size())
 		{
 			volume top = toVisit.top();
+		
+			/*std::cout << "===============" << std::endl;
+			std::cout << "loop: " << index++ << std::endl;	
+			std::cout << "indx: " << top.index << std::endl;
+			std::cout << "nmOb: " << top.numObjs << std::endl;
+			std::cout << "tvsz: " << toVisit.size() << std::endl;*/
 			
 			if(top.numObjs && top.intersects(r))
-			{		
+			{
 				for(UInt64 o = 0; o < numObjs; o++)
 				{
 					if(top.obj[o])
@@ -262,11 +270,14 @@ namespace bvh_n
 	
 				if(top.index*2 < heir.size())
 				{
-					toVisit.push(heir[top.index*2]);
-					
+					if(heir[top.index*2].numObjs)
+						toVisit.push(heir[top.index*2]);
+					//std::cout << "first: " <<  << std::endl;
 					if(top.index*2+1 < heir.size())
 					{
-						toVisit.push(heir[top.index*2+1]);
+						if(heir[top.index*2+1].numObjs)
+							toVisit.push(heir[top.index*2+1]);
+						//std:cout << "second: " << heir[top.index*2+1].index << std::endl;
 					}
 				}
 			}

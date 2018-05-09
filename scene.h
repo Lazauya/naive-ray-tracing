@@ -105,6 +105,9 @@ namespace scene
 						
 						//first find the intersection point closest to the origin
 						shader shad;
+						#ifdef DEBUG_SHAD
+						std::cout << "Shade begin" << std::endl;
+						#endif
 						rgbColor col = shad(ambience, 
 								&lightList, 
 								heirarchy(rays[x][y][r]), 
@@ -112,7 +115,6 @@ namespace scene
 								&heirarchy,
 								x,
 								y);
-
 						avg = avg + col;
 					}
 					avg = avg*(1/pow(window->subdivisions,2));

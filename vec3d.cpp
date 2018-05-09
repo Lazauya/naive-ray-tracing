@@ -77,13 +77,20 @@ namespace v3d
 	
 	vec3d vec3d::rotate(const vec3d & direction, F64 angle) const
 	{
-		vec3d norm = this->normal(direction);
-		vec3d para = direction - norm;
-		vec3d w = direction.cross(norm);
-		F64 x1 = cos(angle)/norm.magnitude();
-		F64 x2 = sin(angle)/norm.magnitude();
-		vec3d normrot = norm.magnitude()*(x1*norm + x2*w);
-		return normrot + para;
+		auto dir = direction;	
+		if((x == 0 && y == 0 && z == 0))
+			return vec3d(0,0,0);
+		if(direction.x == 0 && direction.y == 0 && direction.z == 0)
+			return *this;
+		if(direction.cross(*this).magnitude() == 0)
+			return *this;
+		vec3d norm = dir.normal(*this);// pv(norm); 
+		vec3d para = (*this) - norm;// pv(para);
+		vec3d w = dir.cross(norm); //pv(w);
+		F64 x1 = cos(angle)/norm.magnitude(); //std::cout << x1 << std::endl;
+		F64 x2 = sin(angle)/w.magnitude(); //std::cout << x2 << std::endl;
+		vec3d normrot = norm.magnitude()*(x1*norm + x2*w); //pv(normrot);
+		return normrot + para; 
 	}
 	
 	point ray3d::cast(F64 t) const
